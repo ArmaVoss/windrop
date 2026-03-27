@@ -6,3 +6,6 @@ router = APIRouter()
 async def enroll():
     return None
 
+@router.post("/upload")
+async def upload():
+    return None
