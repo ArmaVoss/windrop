@@ -1,11 +1,29 @@
+from pydantic import BaseModel
 from pydantic_settings import BaseSettings
 from pathlib import Path
 
-class Settings(BaseSettings):
-    APP_NAME: str = "Windrop"
+class DatabaseSettings(BaseModel):
+    root_path: Path 
     
-    ROOT_DIR: Path = Path(__file__).resolve().parent
+    database_name: str = "windrop"
+    
+    @property
+    def database_path(self) -> Path:
+        return self.root_path / "database"
+
+class Settings(BaseSettings):
+    # app conf
+    app_name: str = "WinDrop"
+    
+    # paths 
+    root_directory: Path = Path(__file__).resolve().parent 
+    
+    @property
+    def migration_directory_path(self) -> Path:
+        return self.root_directory / "migrations"
+
+    # database conf
+    database: DatabaseSettings = DatabaseSettings(root_path=root_directory)
 
 
-
-
+settings = Settings()
