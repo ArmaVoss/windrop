@@ -9,14 +9,14 @@ class DatabaseSettings(BaseModel):
     
     @property
     def database_path(self) -> Path:
-        return self.root_path / "database"
+        return self.root_path / "database" / (self. database_name + ".db")
 
 class Settings(BaseSettings):
     # app conf
     app_name: str = "WinDrop"
     
     # paths 
-    root_directory: Path = Path(__file__).resolve().parent 
+    root_directory: Path = Path(__file__).resolve().parent.parent
     
     @property
     def migration_directory_path(self) -> Path:
