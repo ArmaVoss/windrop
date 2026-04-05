@@ -1,9 +1,9 @@
 from fastapi import FastAPI
-from migrate import migrate_database
+import migrate
 from config.config import settings
 
 def main():
-    migrate_database()        
+    migrate.migrate_database()        
     app = FastAPI()
 
 if __name__ == "__main__":
