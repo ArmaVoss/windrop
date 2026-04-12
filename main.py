@@ -1,10 +1,17 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from windrop.router import router as windrop_router
+
 import migrate
-from config.config import settings
+from database.database import database
 
-def main():
-    migrate.migrate_database()        
-    app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    migrate.migrate_database()
+    try:
+        yield
+    finally:
+        database.close()
 
-if __name__ == "__main__":
-    main()
+app = FastAPI(lifespan=lifespan)
+app.include_router(router=windrop_router)

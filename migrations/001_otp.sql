@@ -1,0 +1,5 @@
+CREATE TABLE otp (
+    token VARCHAR(8) PRIMARY KEY,
+    expiry TEXT NOT NULL,
+    used BOOLEAN NOT NULL
+);

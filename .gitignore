@@ -9,5 +9,13 @@ dist/
 wheels/
 *.egg-info
 
+# Database file
+*.db
+
 # Virtual environments
 .venv
+
+#IDE
+.vscode
+database/windrop.db-journal
+database/windrop.db
