@@ -1,8 +1,8 @@
 import secrets 
 import string 
 import database
-import utils
 
+from .utils import validate_otp, create_certificate_from_csr
 from fastapi import APIRouter, HTTPException
 from datetime import datetime, timezone, timedelta
 from database.database import database
@@ -66,7 +66,7 @@ async def enroll(request_to_enroll: EnrollRequest):
     device_name = request_to_enroll.device_name
 
     try:
-        utils.validate_otp(one_time_password)
+        validate_otp(one_time_password)
     except HTTPException:
         raise
     
@@ -81,7 +81,7 @@ async def enroll(request_to_enroll: EnrollRequest):
 
     # create cert use csr, and sign it using our ca private key
     # add device to list of trusted devices 
-    client_cert = utils.create_certificate_from_csr(
+    client_cert = create_certificate_from_csr(
         ca_private_key,
         certfiicate_signing_request,
         device_name,
