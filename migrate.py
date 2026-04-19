@@ -5,7 +5,6 @@ import sys
 MIGRATION_DIR_PATH: Path = settings.migration_directory_path
 
 def add_schema_table():
-
     try:
         database.execute_sql(    
             """CREATE TABLE IF NOT EXISTS schema_migrations(
@@ -13,6 +12,7 @@ def add_schema_table():
             applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             );"""
         )
+        database.commit()
     except:
         print("Error starting database")
         sys.exit(1)  
@@ -37,7 +37,7 @@ def apply_migration(migration_file_path, version):
 
 def migrate_database():
     add_schema_table()
-    
+
     migration_files = sorted(list(MIGRATION_DIR_PATH.glob("**/*.sql")))
     num_migration_files = len(migration_files)
 
