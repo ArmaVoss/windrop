@@ -1,6 +1,5 @@
 import secrets 
 import string 
-import database
 
 from .utils import validate_otp, create_certificate_from_csr
 from fastapi import APIRouter, HTTPException
@@ -32,7 +31,7 @@ async def generate_otp():
     """
 
     one_time_password = ''.join(secrets.choice(ALLOWED_OTP_CHARACTERS) for i in range(8))
-    expiry = (datetime.now(timezone.utc) + timedelta(seconds=60)).isoformat()
+    expiry = (datetime.now(timezone.utc) + timedelta(seconds=TIME_TO_EXPIRY_SECONDS)).isoformat()
 
     try:
         database.execute_sql(
@@ -61,7 +60,7 @@ async def enroll(request_to_enroll: EnrollRequest):
         HTTPExcpetion: Raised with 500 status 
         HTTPException: Raised with 401 status
     """
-    certfiicate_signing_request = request_to_enroll.signing_request 
+    certficate_signing_request = request_to_enroll.signing_request 
     one_time_password = request_to_enroll.otp
     device_name = request_to_enroll.device_name
 
@@ -78,19 +77,25 @@ async def enroll(request_to_enroll: EnrollRequest):
     with open(settings.certificate_authority.ca_key_path, "rb") as f:
         ca_private_key = serialization.load_pem_private_key(f.read(), password=None)
 
-
-    # create cert use csr, and sign it using our ca private key
-    # add device to list of trusted devices 
     client_cert = create_certificate_from_csr(
         ca_private_key,
-        certfiicate_signing_request,
+        certficate_signing_request,
         device_name,
-        ca_cert.issuer,
+        ca_cert.subject,
     )
 
+    try:
+        database.execute_sql(
+            "INSERT into trusted_devices (cert_serial_number, device_name, revoked) values (?, ?, ?)",
+            params=(client_cert.serial_number, device_name, False)
+        )
+        database.commit()
+    except Exception as e:
+        raise HTTPException(500, INTERNAL_SERVER_ERROR_DESC)
+    
     return EnrollResponse(
-        ca_certificate=ca_cert,
-        client_certificate=client_cert
+        ca_certificate=ca_cert.public_bytes(serialization.Encoding.PEM).decode("utf-8"),
+        client_certificate=client_cert.public_bytes(serialization.Encoding.PEM).decode("utf-8")
     )
 
 @router.post("/upload")
