@@ -12,3 +12,6 @@ class EnrollRequest(BaseModel):
 class EnrollResponse(BaseModel):
     ca_certificate: str
     client_certificate: str
+
+class DeleteTrustedDeviceRequest(BaseModel):
+    client_certificate_serial_number: str

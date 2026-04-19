@@ -7,7 +7,7 @@ from datetime import datetime, timezone, timedelta
 from database.database import database
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
-from .schemas import OtpResponse, EnrollRequest, EnrollResponse
+from .schemas import OtpResponse, EnrollRequest, EnrollResponse, DeleteTrustedDeviceRequest
 from .error_codes import INTERNAL_SERVER_ERROR_DESC
 from config.config import settings
 
@@ -97,6 +97,24 @@ async def enroll(request_to_enroll: EnrollRequest):
         ca_certificate=ca_cert.public_bytes(serialization.Encoding.PEM).decode("utf-8"),
         client_certificate=client_cert.public_bytes(serialization.Encoding.PEM).decode("utf-8")
     )
+
+@router.patch("/device/revoke")
+async def revoke_device(delete_device_request: DeleteTrustedDeviceRequest):
+    """
+    Revoke a device from trusted devices
+
+    Raises:
+        HTTPException: Raised with 500 status 
+    """
+
+    try:
+        database.execute_sql(
+            "UPDATE trusted_devices SET revoked = TRUE WHERE cert_serial_number = ?;",
+            params=(delete_device_request.client_certificate_serial_number,)
+        )
+        database.commit()
+    except Exception as e:
+        raise HTTPException(500, INTERNAL_SERVER_ERROR_DESC)
 
 @router.post("/upload")
 async def upload():
