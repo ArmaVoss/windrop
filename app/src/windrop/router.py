@@ -105,9 +105,6 @@ async def revoke_device(delete_device_request: DeleteTrustedDeviceRequest):
     """
     Revoke a device from trusted devices
 
-    Returns:
-        Response: 200 on success
-        
     Raises:
         HTTPException: Raised with 500 status 
     """
@@ -124,8 +121,11 @@ async def revoke_device(delete_device_request: DeleteTrustedDeviceRequest):
 @router.post("/upload")
 async def upload_files(files: list[UploadFile]):
     """
-        Revoke a device from trusted devices
+    Revoke a device from trusted devices
 
+    Returns:
+        Response: 200 on success
+        
     Raises:
         HTTPException: Raised with 400 status 
     """
