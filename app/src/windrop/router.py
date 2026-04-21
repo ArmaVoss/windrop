@@ -105,6 +105,9 @@ async def revoke_device(delete_device_request: DeleteTrustedDeviceRequest):
     """
     Revoke a device from trusted devices
 
+    Returns:
+        Response: 200 on success
+        
     Raises:
         HTTPException: Raised with 500 status 
     """
@@ -120,6 +123,13 @@ async def revoke_device(delete_device_request: DeleteTrustedDeviceRequest):
 
 @router.post("/upload")
 async def upload_files(files: list[UploadFile]):
+    """
+        Revoke a device from trusted devices
+
+    Raises:
+        HTTPException: Raised with 400 status 
+    """
+
     for file in files:
         if not file.filename:
             raise HTTPException(400, "File must have a name")
