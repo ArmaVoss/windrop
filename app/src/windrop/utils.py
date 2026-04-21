@@ -7,6 +7,7 @@ from cryptography.x509.oid import NameOID
 from datetime import datetime, timezone, timedelta
 from cryptography.hazmat.primitives import hashes
 
+
 ISSUED_CERT_TIME_TO_EXPIRY_DAYS = 365
 
 def validate_otp(one_time_password) -> bool:

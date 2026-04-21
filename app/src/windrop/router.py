@@ -1,8 +1,10 @@
 import secrets 
 import string 
+import aiofiles
 
+from pathlib import Path 
 from .utils import validate_otp, create_certificate_from_csr
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, File, UploadFile
 from datetime import datetime, timezone, timedelta
 from database.database import database
 from cryptography import x509
@@ -117,5 +119,17 @@ async def revoke_device(delete_device_request: DeleteTrustedDeviceRequest):
         raise HTTPException(500, INTERNAL_SERVER_ERROR_DESC)
 
 @router.post("/upload")
-async def upload():
-    return None
+async def upload_files(files: list[UploadFile]):
+    for file in files:
+        if not file.filename:
+            raise HTTPException(400, "File must have a name")
+
+        file_name = Path(file.filename).name
+        dest = settings.default_download_directory / file_name
+
+        if not dest.resolve().is_relative_to(settings.default_download_directory.resolve()):
+            raise HTTPException(400, "Invalid filename")
+
+        async with aiofiles.open(dest, "wb") as buffer:
+            while chunk := await file.read(1024 * 1024):  # 1MB chunks
+                await buffer.write(chunk)

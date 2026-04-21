@@ -1,8 +1,22 @@
 from pydantic import BaseModel, model_validator
 from pydantic_settings import BaseSettings
 from pathlib import Path
+import platform
+import os 
 
 ROOT_DIRECTORY: Path = Path(__file__).resolve().parent.parent
+
+def get_default_download_dir() -> Path:
+    system = platform.system()
+    home = Path.home()
+
+    if system == "Linux":
+        xdg = Path(os.environ["XDG_DOWNLOAD_DIR"]) if "XDG_DOWNLOAD_DIR" in os.environ else None
+        return xdg or home / "Downloads"
+
+    return home / "Downloads" 
+
+DEFAULT_DOWLOAD_DIR = get_default_download_dir()
 
 class CertificateSettings(BaseModel):
     PROD_CA_CERT: Path = Path("/temp_path_until_distrib_configured/ca.crt")
@@ -42,5 +56,6 @@ class Settings(BaseSettings):
 
     database: DatabaseSettings = DatabaseSettings()
     certificate_authority: CertificateSettings = CertificateSettings()
+    default_download_directory: Path = DEFAULT_DOWLOAD_DIR
 
 settings = Settings()
