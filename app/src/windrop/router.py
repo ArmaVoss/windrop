@@ -1,6 +1,7 @@
 import secrets 
 import string 
 import aiofiles
+import json
 
 from pathlib import Path 
 from .utils import validate_otp, create_certificate_from_csr
@@ -9,7 +10,7 @@ from datetime import datetime, timezone, timedelta
 from database.database import database
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
-from .schemas import OtpResponse, EnrollRequest, EnrollResponse, DeleteTrustedDeviceRequest
+from .schemas import OtpResponse, EnrollRequest, EnrollResponse, DeleteTrustedDeviceRequest, UpdateDownloadPathRequest
 from .error_codes import INTERNAL_SERVER_ERROR_DESC
 from config.config import settings
 
@@ -118,6 +119,30 @@ async def revoke_device(delete_device_request: DeleteTrustedDeviceRequest):
     except Exception as e:
         raise HTTPException(500, INTERNAL_SERVER_ERROR_DESC)
 
+@router.patch("/path/update")
+async def update_default_download_dir(update_download_path_request: UpdateDownloadPathRequest):
+    """
+    Update the path for uploaded files to save to
+
+    Raises:
+        HTTPException: Raises 400 status on bad path requested
+    """
+
+    new_download_path = update_download_path_request.download_directory_path
+    new_download_path = Path(new_download_path)
+    if not new_download_path.exists():
+        raise HTTPException(400, "Invalid directory path")
+
+    settings.download_directory = new_download_path
+    with open(settings.config_path, "r") as f:
+        data = json.load(f)
+
+    data["download_path"] = str(new_download_path)
+    with open(settings.config_path, "w") as f:
+        json.dump(data, f, indent=4)
+
+    return {"message": "Download directory updated", "path": str(new_download_path)}
+
 @router.post("/upload")
 async def upload_files(files: list[UploadFile]):
     """
@@ -135,11 +160,13 @@ async def upload_files(files: list[UploadFile]):
             raise HTTPException(400, "File must have a name")
 
         file_name = Path(file.filename).name
-        dest = settings.default_download_directory / file_name
+        dest = settings.download_directory / file_name
 
-        if not dest.resolve().is_relative_to(settings.default_download_directory.resolve()):
+        if not dest.resolve().is_relative_to(settings.download_directory1.resolve()):
             raise HTTPException(400, "Invalid filename")
 
         async with aiofiles.open(dest, "wb") as buffer:
             while chunk := await file.read(1024 * 1024):  # 1MB chunks
                 await buffer.write(chunk)
+
+    return {"message": "Successfully received all uploaded files"}

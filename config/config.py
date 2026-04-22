@@ -1,10 +1,11 @@
-from pydantic import BaseModel, model_validator
-from pydantic_settings import BaseSettings
+from pydantic import BaseModel, model_validator, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 import platform
-import os 
+import os
 
 ROOT_DIRECTORY: Path = Path(__file__).resolve().parent.parent
+
 
 def get_default_download_dir() -> Path:
     system = platform.system()
@@ -14,9 +15,11 @@ def get_default_download_dir() -> Path:
         xdg = Path(os.environ["XDG_DOWNLOAD_DIR"]) if "XDG_DOWNLOAD_DIR" in os.environ else None
         return xdg or home / "Downloads"
 
-    return home / "Downloads" 
+    return home / "Downloads"
 
-DEFAULT_DOWLOAD_DIR = get_default_download_dir()
+
+DEFAULT_DOWNLOAD_DIR = get_default_download_dir()
+
 
 class CertificateSettings(BaseModel):
     PROD_CA_CERT: Path = Path("/temp_path_until_distrib_configured/ca.crt")
@@ -38,24 +41,35 @@ class CertificateSettings(BaseModel):
         else:
             raise ValueError("No CA cert/key found in prod or dev paths")
         return self
-    
+
+
 class DatabaseSettings(BaseModel):
     database_name: str = "windrop"
-    
+
     @property
     def database_path(self) -> Path:
-        return ROOT_DIRECTORY / "database" / (self. database_name + ".db")
+        return ROOT_DIRECTORY / "database" / (self.database_name + ".db")
+
 
 class Settings(BaseSettings):
-    # app conf
+    model_config = SettingsConfigDict(json_file="app_config.json", populate_by_name=True)
+    root_directory: Path = ROOT_DIRECTORY
+    config_path:Path = ROOT_DIRECTORY / "config" / "app_config.json"
     app_name: str = "WinDrop"
-    
+    download_directory: Path | None = Field(default=None, alias="download_path")
+
     @property
     def migration_directory_path(self) -> Path:
         return ROOT_DIRECTORY / "migrations"
 
     database: DatabaseSettings = DatabaseSettings()
     certificate_authority: CertificateSettings = CertificateSettings()
-    default_download_directory: Path = DEFAULT_DOWLOAD_DIR
+
+    @model_validator(mode="after")
+    def resolve_download_dir(self) -> "Settings":
+        if self.download_directory is None:
+            self.download_directory = DEFAULT_DOWNLOAD_DIR
+        return self
+
 
 settings = Settings()

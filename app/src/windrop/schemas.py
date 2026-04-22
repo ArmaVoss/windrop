@@ -15,3 +15,6 @@ class EnrollResponse(BaseModel):
 
 class DeleteTrustedDeviceRequest(BaseModel):
     client_certificate_serial_number: str
+
+class UpdateDownloadPathRequest(BaseModel):
+    download_directory_path: str
