@@ -1,8 +1,9 @@
-from pydantic import BaseModel, model_validator, Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from pathlib import Path
-import platform
 import os
+import platform
+from pathlib import Path
+
+from pydantic import BaseModel, Field, model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT_DIRECTORY: Path = Path(__file__).resolve().parent.parent
 
@@ -12,7 +13,11 @@ def get_default_download_dir() -> Path:
     home = Path.home()
 
     if system == "Linux":
-        xdg = Path(os.environ["XDG_DOWNLOAD_DIR"]) if "XDG_DOWNLOAD_DIR" in os.environ else None
+        xdg = (
+            Path(os.environ["XDG_DOWNLOAD_DIR"])
+            if "XDG_DOWNLOAD_DIR" in os.environ
+            else None
+        )
         return xdg or home / "Downloads"
 
     return home / "Downloads"
@@ -52,9 +57,11 @@ class DatabaseSettings(BaseModel):
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(json_file="app_config.json", populate_by_name=True)
+    model_config = SettingsConfigDict(
+        json_file="app_config.json", populate_by_name=True
+    )
     root_directory: Path = ROOT_DIRECTORY
-    config_path:Path = ROOT_DIRECTORY / "config" / "app_config.json"
+    config_path: Path = ROOT_DIRECTORY / "config" / "app_config.json"
     app_name: str = "WinDrop"
     download_directory: Path | None = Field(default=None, alias="download_path")
 

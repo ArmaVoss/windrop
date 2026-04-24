@@ -1,21 +1,25 @@
-from config.config import settings
-from database.database import database 
+import sys
 from pathlib import Path
-import sys 
+
+from config.config import settings
+from database.database import database
+
 MIGRATION_DIR_PATH: Path = settings.migration_directory_path
+
 
 def add_schema_table():
     try:
-        database.execute_sql(    
+        database.execute_sql(
             """CREATE TABLE IF NOT EXISTS schema_migrations(
             version INTEGER NOT NULL PRIMARY KEY,
             applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             );"""
         )
         database.commit()
-    except:
+    except Exception:
         print("Error starting database")
-        sys.exit(1)  
+        sys.exit(1)
+
 
 def apply_migration(migration_file_path, version):
     with open(migration_file_path, "r") as sql_script:
@@ -28,12 +32,13 @@ def apply_migration(migration_file_path, version):
             INSERT INTO schema_migrations (version)
             VALUES (?);
             """,
-            (version,)
+            (version,),
         )
         database.commit()
     except Exception:
         database.rollback()
         raise
+
 
 def migrate_database():
     add_schema_table()
@@ -44,7 +49,7 @@ def migrate_database():
     if num_migration_files < 1:
         print("No migrations to run")
         return
-    
+
     database_cursor = database.execute_sql(
         "SELECT COUNT(*) AS count FROM schema_migrations"
     )
@@ -56,8 +61,6 @@ def migrate_database():
         return
 
     for migration_number, migration in enumerate(
-        migration_files[number_migrated_rows:],
-        start=number_migrated_rows + 1
+        migration_files[number_migrated_rows:], start=number_migrated_rows + 1
     ):
         apply_migration(migration, migration_number)
-
