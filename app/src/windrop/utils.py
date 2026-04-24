@@ -54,7 +54,7 @@ def create_certificate_from_csr(ca_private_key, csr, device_name, issuer):
         ]
     )
 
-    csr = x509.load_pem_x509_csr(csr)
+    csr = x509.load_pem_x509_csr(csr.encode() if isinstance(csr, str) else csr)
 
     return (
         x509.CertificateBuilder()
