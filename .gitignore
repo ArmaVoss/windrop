@@ -17,5 +17,5 @@ wheels/
 
 #IDE
 .vscode
-database/windrop.db-journal
-database/windrop.db
+backend/database/windrop.db-journal
+backend/database/windrop.db

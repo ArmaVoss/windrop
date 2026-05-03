@@ -7,6 +7,12 @@ resolution-markers = [
     "python_full_version < '3.13'",
 ]
 
+[manifest]
+members = [
+    "windrop-backend",
+    "windrop-desktop",
+]
+
 [[package]]
 name = "aiofiles"
 version = "25.1.0"
@@ -1109,9 +1115,9 @@ wheels = [
 ]
 
 [[package]]
-name = "windrop"
+name = "windrop-backend"
 version = "0.1.0"
-source = { virtual = "." }
+source = { virtual = "backend" }
 dependencies = [
     { name = "aiofiles" },
     { name = "cryptography" },
@@ -1142,3 +1148,8 @@ dev = [
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "pytest", specifier = ">=9.0.3" },
 ]
+
+[[package]]
+name = "windrop-desktop"
+version = "0.1.0"
+source = { virtual = "desktop" }
