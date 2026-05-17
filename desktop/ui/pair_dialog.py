@@ -61,9 +61,15 @@ class PairDialog(QDialog):
         self._countdown_label.setText("Expires in 0s")
         self._refresh_btn.setVisible(True)
 
-    def _refresh(self): 
-        self._remaining = TIME_TO_EXPIRY_SECONDS
+    def _refresh(self):
         otp = self._refresh_fn()
+        if not otp:
+            self._instruction.setText("Something went wrong. Please try again.")
+            self._qr_label.setPixmap(QPixmap())
+            self._countdown_label.setText("")
+            self._refresh_btn.setVisible(True)
+            return
+        self._remaining = TIME_TO_EXPIRY_SECONDS
         self._qr_label.setPixmap(self._make_qr_pixmap(otp, size=240))
         self._instruction.setText("Scan this code with your device to pair:")
         self._refresh_btn.setVisible(False)
