@@ -8,4 +8,5 @@ dependencies = [
     "pyqt6>=6.11.0",
     "requests>=2.33.1",
     "qrcode>=8.0",
+    "pillow>=11.0",
 ]

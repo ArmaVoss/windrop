@@ -5,7 +5,7 @@ from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QDialog, QLabel, QVBoxLayout, QPushButton
 
-TIME_TO_EXPIRY = 60
+TIME_TO_EXPIRY_SECONDS = 60
 
 
 class PairDialog(QDialog):
@@ -14,7 +14,7 @@ class PairDialog(QDialog):
         self.setWindowTitle("Pair Device")
         self.setFixedSize(300, 400)
         self._refresh_fn = refresh_fn
-        self._remaining = TIME_TO_EXPIRY
+        self._remaining = TIME_TO_EXPIRY_SECONDS
 
         layout = QVBoxLayout()
         layout.setSpacing(12)
@@ -61,8 +61,8 @@ class PairDialog(QDialog):
         self._countdown_label.setText("Expires in 0s")
         self._refresh_btn.setVisible(True)
 
-    def _refresh(self):
-        self._remaining = TIME_TO_EXPIRY
+    def _refresh(self): 
+        self._remaining = TIME_TO_EXPIRY_SECONDS
         otp = self._refresh_fn()
         self._qr_label.setPixmap(self._make_qr_pixmap(otp, size=240))
         self._instruction.setText("Scan this code with your device to pair:")

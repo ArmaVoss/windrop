@@ -1,6 +1,6 @@
 import requests
 from urllib.parse import urljoin
-from schemas import OtpResponse
+from .schemas import OtpResponse
 
 BASE_URL = "http://localhost:8000"
 API_PATH_PREFIX = "api/v1/"
