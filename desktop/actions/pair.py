@@ -6,7 +6,9 @@ from PyQt6.QtWidgets import QMessageBox
 def enable_pairing():
     otp = requests.getQrCode()
     if not otp:
-        QMessageBox.warning(None, "Connection Error", "Something went wrong. Please try again.")
+        QMessageBox.warning(
+            None, "Connection Error", "Something went wrong. Please try again."
+        )
         return
     dialog = PairDialog(otp, refresh_fn=requests.getQrCode)
     dialog.exec()

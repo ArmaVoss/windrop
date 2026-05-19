@@ -1,12 +1,9 @@
 from pydantic import BaseModel
 
+
 class Device(BaseModel):
     device_name: str
     cert_serial_number: int
-
-
-class DevicesResponse(BaseModel):
-    devices: list[Device]
 
 
 class OtpResponse(BaseModel):

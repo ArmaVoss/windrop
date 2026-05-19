@@ -85,4 +85,9 @@ class PairDialog(QDialog):
         img.save(buf, format="PNG")
         pixmap = QPixmap()
         pixmap.loadFromData(buf.getvalue(), "PNG")
-        return pixmap.scaled(size, size, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        return pixmap.scaled(
+            size,
+            size,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation,
+        )
