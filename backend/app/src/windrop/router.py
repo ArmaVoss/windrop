@@ -14,6 +14,8 @@ from database.database import database
 
 from .error_codes import INTERNAL_SERVER_ERROR_DESC
 from .schemas import (
+    Device,
+    DevicesResponse,
     DeleteTrustedDeviceRequest,
     EnrollRequest,
     EnrollResponse,
@@ -26,6 +28,33 @@ ALLOWED_OTP_CHARACTERS = string.ascii_letters + string.digits
 TIME_TO_EXPIRY_SECONDS = 60.0
 router = APIRouter(prefix="/api/v1")
 
+@router.get(
+        "/devices",
+        response_model=DevicesResponse
+)
+async def get_devices():
+    """
+    Get list of paired devices
+
+    Returns:
+        DeviceResponse: List of device objects
+    """
+
+    try:
+        response = database.execute_sql(
+            "select td.cert_serial_number, td.device_name FROM trusted_devices as td"
+        )
+    except Exception as e:
+        print("An error occured with the database", e)
+        raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR_DESC)
+
+    device_response = DevicesResponse(devices=[])
+    for row in response.fetchall():
+        device_response.devices.append(Device(device_name=row['device_name'], cert_serial_number=row['cert_serial_number']))
+
+    return device_response
+
+    
 
 @router.post(
     "/otp/generate",
